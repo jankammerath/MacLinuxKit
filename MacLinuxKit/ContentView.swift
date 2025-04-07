@@ -8,12 +8,18 @@
 import SwiftUI
 
 struct ContentView: View {
+    private var linuxKit = LinuxKit()
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Text("The button does all the magic!")
+            Button("Start le VM!") {
+                do {
+                    try linuxKit.startVM()
+                } catch {
+                    print("Error starting VM: \(error)")
+                }
+            }
         }
         .padding()
     }

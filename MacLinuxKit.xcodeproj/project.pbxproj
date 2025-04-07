@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3D961E592DA3F049005D9F16 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3D961E582DA3F044005D9F16 /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		3D961E3A2DA3EC78005D9F16 /* MacLinuxKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacLinuxKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D961E582DA3F044005D9F16 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +37,7 @@
 		3D961E312DA3EC78005D9F16 = {
 			isa = PBXGroup;
 			children = (
+				3D961E582DA3F044005D9F16 /* .gitignore */,
 				3D961E3C2DA3EC78005D9F16 /* MacLinuxKit */,
 				3D961E3B2DA3EC78005D9F16 /* Products */,
 			);
@@ -109,6 +115,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D961E592DA3F049005D9F16 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
