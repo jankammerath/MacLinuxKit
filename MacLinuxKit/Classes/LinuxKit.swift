@@ -30,14 +30,9 @@ class LinuxKit {
             case .success:
                 print("VM started successfully")
                 print("VM state: \(self.virtualMachine!.state.rawValue)")
-                // Check if the VM is running periodically
-                Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
-                    print("VM state: \(self.virtualMachine!.state.rawValue)")
-                    
-                    guard let networkDevice = self.virtualMachine?.networkDevices.first else {
-                        print("No network device found")
-                        return
-                    }
+                
+                self.virtualMachine?.networkDevices.forEach { device in
+                    print("Network device: \(device.debugDescription)")
                 }
             case .failure(let error):
                 print("VM failed to start: \(error)")
@@ -52,17 +47,22 @@ class LinuxKit {
         virtualMachineConfiguration.cpuCount = 2
         virtualMachineConfiguration.bootLoader = try createBootLoader(kernelURL: kernelURL, initrdURL: initrdURL)
         
-        // Create and attach a network device
         let networkDeviceAttachment = VZNATNetworkDeviceAttachment()
         let networkDeviceConfiguration = VZVirtioNetworkDeviceConfiguration()
         networkDeviceConfiguration.attachment = networkDeviceAttachment
         virtualMachineConfiguration.networkDevices = [networkDeviceConfiguration]
         
         // Create and attach a serial port device
-        let serialPortAttachment = try createSerialPortAttachment()
-        let serialPortConfiguration = VZVirtioConsoleDeviceSerialPortConfiguration()
-        serialPortConfiguration.attachment = serialPortAttachment
-        virtualMachineConfiguration.serialPorts = [serialPortConfiguration]
+        let consoleConfiguration = VZVirtioConsoleDeviceConfiguration()
+        let consolePortConfig = VZVirtioConsolePortConfiguration()
+        consolePortConfig.isConsole = true
+        consolePortConfig.attachment = VZFileHandleSerialPortAttachment(
+          fileHandleForReading: FileHandle.standardInput,
+          fileHandleForWriting: FileHandle.standardOutput
+        )
+
+        consoleConfiguration.ports[0] = consolePortConfig
+        virtualMachineConfiguration.consoleDevices = [consoleConfiguration]
         
         try virtualMachineConfiguration.validate()
         
@@ -77,32 +77,7 @@ class LinuxKit {
     private func createBootLoader(kernelURL: URL, initrdURL: URL) throws -> VZLinuxBootLoader {
         let bootLoader = VZLinuxBootLoader(kernelURL: kernelURL)
         bootLoader.initialRamdiskURL = initrdURL
-        bootLoader.commandLine = "console=ttyS0"
+        bootLoader.commandLine = "console=tty0 console=ttyS0 console=ttyAMA0"
         return bootLoader
-    }
-    
-    private func createSerialPortAttachment() throws -> VZFileHandleSerialPortAttachment {
-        // Create a new pipe for serial communication
-        self.serialPipe = Pipe()
-        
-        // Set up a more robust read handler
-        DispatchQueue.global(qos: .background).async {
-            while true {
-                let data = self.serialPipe.fileHandleForReading.availableData
-                if !data.isEmpty {
-                    if let output = String(data: data, encoding: .utf8) {
-                        DispatchQueue.main.async {
-                            print("[Linux VM] \(output)")
-                        }
-                    }
-                }
-                
-                // Small delay to prevent high CPU usage
-                Thread.sleep(forTimeInterval: 0.1)
-            }
-        }
-
-        return VZFileHandleSerialPortAttachment(fileHandleForReading: self.serialPipe.fileHandleForReading,
-                                               fileHandleForWriting: self.serialPipe.fileHandleForWriting)
     }
 }
