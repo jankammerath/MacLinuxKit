@@ -10,9 +10,25 @@ import Virtualization
 
 class LinuxKit: ObservableObject {
     private var virtualMachine: VZVirtualMachine?
-    private var ipAddress: String = ""
     private var outputPipe = Pipe()
+    private var readTimer: Timer?
     @Published public var standardOutput = ""
+    @Published var ipAddress: String = ""
+    @Published var isRunning: Bool = false
+    
+    private func extractIpAddress() -> String? {
+        let pattern = #"leased (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) for"#
+        let regex = try? NSRegularExpression(pattern: pattern, options: [])
+        let range = NSRange(location: 0, length: standardOutput.utf16.count)
+        
+        if let match = regex?.firstMatch(in: standardOutput, options: [], range: range) {
+            if let ipRange = Range(match.range(at: 1), in: standardOutput) {
+                return String(standardOutput[ipRange])
+            }
+        }
+        
+        return nil
+    }
     
     func startVM() throws {
         guard let initrdURL = Bundle.main.url(forResource: "linuxkit-initrd", withExtension: "img"),
@@ -32,13 +48,19 @@ class LinuxKit: ObservableObject {
             case .success:
                 print("VM started successfully")
                 print("VM state: \(self.virtualMachine!.state.rawValue)")
+                self.isRunning = true
                 
                 self.virtualMachine?.networkDevices.forEach { device in
                     print("Network device: \(device.debugDescription)")
                 }
                 
-                Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-                    // ...
+                self.readTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+                    let extractedIpAddr = self.extractIpAddress()
+                    if extractedIpAddr != nil {
+                        self.ipAddress = extractedIpAddr!
+                        print("Extracted IP address: \(self.ipAddress)")
+                        self.readTimer?.invalidate()
+                    }
                 }
             case .failure(let error):
                 print("VM failed to start: \(error)")
