@@ -13,13 +13,12 @@ class LinuxKit {
     private var serialPipe = Pipe()
     
     func startVM() throws {
-        guard let cmdlineURL = Bundle.main.url(forResource: "linuxkit-cmdline", withExtension: nil),
-              let initrdURL = Bundle.main.url(forResource: "linuxkit-initrd", withExtension: "img"),
+        guard let initrdURL = Bundle.main.url(forResource: "linuxkit-initrd", withExtension: "img"),
               let kernelURL = Bundle.main.url(forResource: "linuxkit-kernel", withExtension: nil) else {
             fatalError("Failed to find LinuxKit resources")
         }
         
-        let virtualMachineConfiguration = try createVirtualMachineConfiguration(kernelURL: kernelURL, initrdURL: initrdURL, cmdlineURL: cmdlineURL)
+        let virtualMachineConfiguration = try createVirtualMachineConfiguration(kernelURL: kernelURL, initrdURL: initrdURL)
         
         self.virtualMachine = VZVirtualMachine(configuration: virtualMachineConfiguration)
         if self.virtualMachine == nil {
@@ -46,12 +45,12 @@ class LinuxKit {
         }
     }
     
-    private func createVirtualMachineConfiguration(kernelURL: URL, initrdURL: URL, cmdlineURL: URL) throws -> VZVirtualMachineConfiguration {
+    private func createVirtualMachineConfiguration(kernelURL: URL, initrdURL: URL) throws -> VZVirtualMachineConfiguration {
         let virtualMachineConfiguration = VZVirtualMachineConfiguration()
         virtualMachineConfiguration.platform = createPlatformConfiguration()
         virtualMachineConfiguration.memorySize = 4 * 1024 * 1024 * 1024  // 4 GB
         virtualMachineConfiguration.cpuCount = 2
-        virtualMachineConfiguration.bootLoader = try createBootLoader(kernelURL: kernelURL, initrdURL: initrdURL, cmdlineURL: cmdlineURL)
+        virtualMachineConfiguration.bootLoader = try createBootLoader(kernelURL: kernelURL, initrdURL: initrdURL)
         
         // Create and attach a network device
         let networkDeviceAttachment = VZNATNetworkDeviceAttachment()
@@ -75,12 +74,10 @@ class LinuxKit {
         return platformConfiguration
     }
     
-    private func createBootLoader(kernelURL: URL, initrdURL: URL, cmdlineURL: URL) throws -> VZLinuxBootLoader {
+    private func createBootLoader(kernelURL: URL, initrdURL: URL) throws -> VZLinuxBootLoader {
         let bootLoader = VZLinuxBootLoader(kernelURL: kernelURL)
         bootLoader.initialRamdiskURL = initrdURL
-        
-        let cmdline = try String(contentsOf: cmdlineURL, encoding: .utf8)
-        bootLoader.commandLine = cmdline
+        bootLoader.commandLine = "console=ttyS0"
         return bootLoader
     }
     
