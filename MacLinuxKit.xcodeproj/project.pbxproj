@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		3D961E592DA3F049005D9F16 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3D961E582DA3F044005D9F16 /* .gitignore */; };
 		3D961E5B2DA43BF9005D9F16 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 3D961E5A2DA43BF5005D9F16 /* README.md */; };
+		3DFB70A42DA47F9500D13D61 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 3DFB70A32DA47F9300D13D61 /* LICENSE */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3D961E3A2DA3EC78005D9F16 /* MacLinuxKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacLinuxKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D961E582DA3F044005D9F16 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		3D961E5A2DA43BF5005D9F16 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		3DFB70A32DA47F9300D13D61 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -44,6 +46,7 @@
 		3D961E312DA3EC78005D9F16 = {
 			isa = PBXGroup;
 			children = (
+				3DFB70A32DA47F9300D13D61 /* LICENSE */,
 				3DFB709E2DA43ECD00D13D61 /* Doc */,
 				3D961E5A2DA43BF5005D9F16 /* README.md */,
 				3D961E582DA3F044005D9F16 /* .gitignore */,
@@ -125,6 +128,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DFB70A42DA47F9500D13D61 /* LICENSE in Resources */,
 				3D961E592DA3F049005D9F16 /* .gitignore in Resources */,
 				3D961E5B2DA43BF9005D9F16 /* README.md in Resources */,
 			);
