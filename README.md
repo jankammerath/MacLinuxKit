@@ -2,7 +2,7 @@
 
 This is a proof of concept application to run a LinuxKit VM in a SwiftUI application and launch docker containers in it.
 
-![LinuxKit VM running in a SwiftUI app](doc/linuxkit.png)
+![LinuxKit VM running in a SwiftUI app](Doc/linuxkit.jpg)
 
 Kindly not that his is extremely early, experimental and being worked on.
 
