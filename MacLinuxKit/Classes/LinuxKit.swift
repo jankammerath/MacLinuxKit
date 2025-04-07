@@ -77,7 +77,7 @@ class LinuxKit {
     private func createBootLoader(kernelURL: URL, initrdURL: URL) throws -> VZLinuxBootLoader {
         let bootLoader = VZLinuxBootLoader(kernelURL: kernelURL)
         bootLoader.initialRamdiskURL = initrdURL
-        bootLoader.commandLine = "console=tty0 console=ttyS0 console=ttyAMA0 console=hvc0"
+        bootLoader.commandLine = "console=hvc0"
         return bootLoader
     }
 }
