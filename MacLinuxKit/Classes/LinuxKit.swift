@@ -9,6 +9,9 @@ import Foundation
 import Virtualization
 
 class LinuxKit {
+    private var virtualMachine: VZVirtualMachine?
+    private var serialPipe = Pipe()
+    
     func startVM() throws {
         guard let cmdlineURL = Bundle.main.url(forResource: "linuxkit-cmdline", withExtension: nil),
               let initrdURL = Bundle.main.url(forResource: "linuxkit-initrd", withExtension: "img"),
@@ -18,12 +21,25 @@ class LinuxKit {
         
         let virtualMachineConfiguration = try createVirtualMachineConfiguration(kernelURL: kernelURL, initrdURL: initrdURL, cmdlineURL: cmdlineURL)
         
-        let virtualMachine = VZVirtualMachine(configuration: virtualMachineConfiguration)
+        self.virtualMachine = VZVirtualMachine(configuration: virtualMachineConfiguration)
+        if self.virtualMachine == nil {
+            fatalError("Failed to create Virtual Machine")
+        }
         
-        virtualMachine.start { result in
+        self.virtualMachine!.start { result in
             switch result {
             case .success:
                 print("VM started successfully")
+                print("VM state: \(self.virtualMachine!.state.rawValue)")
+                // Check if the VM is running periodically
+                Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+                    print("VM state: \(self.virtualMachine!.state.rawValue)")
+                    
+                    guard let networkDevice = self.virtualMachine?.networkDevices.first else {
+                        print("No network device found")
+                        return
+                    }
+                }
             case .failure(let error):
                 print("VM failed to start: \(error)")
             }
@@ -38,10 +54,16 @@ class LinuxKit {
         virtualMachineConfiguration.bootLoader = try createBootLoader(kernelURL: kernelURL, initrdURL: initrdURL, cmdlineURL: cmdlineURL)
         
         // Create and attach a network device
-        let networkDeviceAttachment = VZNATNetworkDeviceAttachment()        
+        let networkDeviceAttachment = VZNATNetworkDeviceAttachment()
         let networkDeviceConfiguration = VZVirtioNetworkDeviceConfiguration()
         networkDeviceConfiguration.attachment = networkDeviceAttachment
         virtualMachineConfiguration.networkDevices = [networkDeviceConfiguration]
+        
+        // Create and attach a serial port device
+        let serialPortAttachment = try createSerialPortAttachment()
+        let serialPortConfiguration = VZVirtioConsoleDeviceSerialPortConfiguration()
+        serialPortConfiguration.attachment = serialPortAttachment
+        virtualMachineConfiguration.serialPorts = [serialPortConfiguration]
         
         try virtualMachineConfiguration.validate()
         
@@ -60,5 +82,30 @@ class LinuxKit {
         let cmdline = try String(contentsOf: cmdlineURL, encoding: .utf8)
         bootLoader.commandLine = cmdline
         return bootLoader
+    }
+    
+    private func createSerialPortAttachment() throws -> VZFileHandleSerialPortAttachment {
+        // Create a new pipe for serial communication
+        self.serialPipe = Pipe()
+        
+        // Set up a more robust read handler
+        DispatchQueue.global(qos: .background).async {
+            while true {
+                let data = self.serialPipe.fileHandleForReading.availableData
+                if !data.isEmpty {
+                    if let output = String(data: data, encoding: .utf8) {
+                        DispatchQueue.main.async {
+                            print("[Linux VM] \(output)")
+                        }
+                    }
+                }
+                
+                // Small delay to prevent high CPU usage
+                Thread.sleep(forTimeInterval: 0.1)
+            }
+        }
+
+        return VZFileHandleSerialPortAttachment(fileHandleForReading: self.serialPipe.fileHandleForReading,
+                                               fileHandleForWriting: self.serialPipe.fileHandleForWriting)
     }
 }
