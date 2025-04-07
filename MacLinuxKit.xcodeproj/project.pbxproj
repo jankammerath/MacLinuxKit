@@ -8,14 +8,21 @@
 
 /* Begin PBXBuildFile section */
 		3D961E592DA3F049005D9F16 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3D961E582DA3F044005D9F16 /* .gitignore */; };
+		3D961E5B2DA43BF9005D9F16 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 3D961E5A2DA43BF5005D9F16 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3D961E3A2DA3EC78005D9F16 /* MacLinuxKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacLinuxKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D961E582DA3F044005D9F16 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		3D961E5A2DA43BF5005D9F16 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		3D935D082DA43C28000AA1B3 /* doc */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = doc;
+			sourceTree = "<group>";
+		};
 		3D961E3C2DA3EC78005D9F16 /* MacLinuxKit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MacLinuxKit;
@@ -37,6 +44,8 @@
 		3D961E312DA3EC78005D9F16 = {
 			isa = PBXGroup;
 			children = (
+				3D935D082DA43C28000AA1B3 /* doc */,
+				3D961E5A2DA43BF5005D9F16 /* README.md */,
 				3D961E582DA3F044005D9F16 /* .gitignore */,
 				3D961E3C2DA3EC78005D9F16 /* MacLinuxKit */,
 				3D961E3B2DA3EC78005D9F16 /* Products */,
@@ -67,6 +76,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				3D935D082DA43C28000AA1B3 /* doc */,
 				3D961E3C2DA3EC78005D9F16 /* MacLinuxKit */,
 			);
 			name = MacLinuxKit;
@@ -116,6 +126,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D961E592DA3F049005D9F16 /* .gitignore in Resources */,
+				3D961E5B2DA43BF9005D9F16 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

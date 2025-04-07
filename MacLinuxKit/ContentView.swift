@@ -8,11 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    private var linuxKit = LinuxKit()
+    @ObservedObject var linuxKit = LinuxKit()
     
     var body: some View {
         VStack {
-            Text("The button does all the magic!")
+            ScrollView {
+                Text(linuxKit.standardOutput)
+                    .font(.system(size: 12, design: .monospaced))
+                    .padding()
+            }
+            
             Button("Start le VM!") {
                 do {
                     try linuxKit.startVM()

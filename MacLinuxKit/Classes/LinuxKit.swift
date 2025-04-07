@@ -8,9 +8,11 @@
 import Foundation
 import Virtualization
 
-class LinuxKit {
+class LinuxKit: ObservableObject {
     private var virtualMachine: VZVirtualMachine?
-    private var serialPipe = Pipe()
+    private var ipAddress: String = ""
+    private var outputPipe = Pipe()
+    @Published public var standardOutput = ""
     
     func startVM() throws {
         guard let initrdURL = Bundle.main.url(forResource: "linuxkit-initrd", withExtension: "img"),
@@ -34,6 +36,10 @@ class LinuxKit {
                 self.virtualMachine?.networkDevices.forEach { device in
                     print("Network device: \(device.debugDescription)")
                 }
+                
+                Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+                    // ...
+                }
             case .failure(let error):
                 print("VM failed to start: \(error)")
             }
@@ -56,10 +62,20 @@ class LinuxKit {
         let consoleConfiguration = VZVirtioConsoleDeviceConfiguration()
         let consolePortConfig = VZVirtioConsolePortConfiguration()
         consolePortConfig.isConsole = true
+        
         consolePortConfig.attachment = VZFileHandleSerialPortAttachment(
           fileHandleForReading: FileHandle.standardInput,
-          fileHandleForWriting: FileHandle.standardOutput
+          fileHandleForWriting: outputPipe.fileHandleForWriting
         )
+        
+        outputPipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
+            let data = handle.availableData
+            if let output = String(data: data, encoding: .utf8) {
+                DispatchQueue.main.async {
+                    self?.standardOutput += output
+                }
+            }
+        }
 
         consoleConfiguration.ports[0] = consolePortConfig
         virtualMachineConfiguration.consoleDevices = [consoleConfiguration]
