@@ -1,10 +1,10 @@
 # MacLinuxKit
 
-This is a proof of concept application to run a LinuxKit VM in a SwiftUI application and launch docker containers in it.
+This is a proof of concept application to run a [LinuxKit](https://github.com/linuxkit/linuxkit) VM in a SwiftUI application and launch docker containers in it. It's using the same approach the Docker Desktop for Mac uses to run LinuxKit VMs. The idea is to have Docker and container capabilities in a native SwiftUI app without the dependency on Docker Desktop.
 
 ![LinuxKit VM running in a SwiftUI app](Doc/linuxkit.jpg)
 
-Kindly not that his is extremely early, experimental and being worked on.
+Kindly note that his is extremely early, experimental and being worked on.
 
 ## Resources
 
