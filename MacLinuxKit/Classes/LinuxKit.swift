@@ -4,6 +4,17 @@
 //
 //  Created by Jan Kammerath on 07.04.25.
 //
+//  This class executes the LinuxKit image with the kernel and initrd in Ramdisk.
+//  All the directories and the rootfs are immutable, hence we need a directory share
+//  to store the containers in the app home so they can be reused.
+//
+//  LinuxKit run example:
+//  linuxkit/src/cmd/linuxkit/run_virtualizationframework_darwin_cgo_enabled.go
+//  linuxkit/src/cmd/linuxkit/run_virtualizationframework.go
+//
+//  Apple's docs on VZ file sharing can be found here:
+//  https://developer.apple.com/documentation/virtualization/vzvirtiofilesystemdeviceconfiguration
+
 
 import Foundation
 import Virtualization
@@ -28,6 +39,23 @@ class LinuxKit: ObservableObject {
         }
         
         return nil
+    }
+    
+    private func getStorageUrl() -> URL {
+        let fileManager = FileManager.default
+        let documentsDirectory = fileManager.urls(for: .applicationDirectory, in: .userDomainMask).first!
+        let storageURL = documentsDirectory.appendingPathComponent("containers")
+        
+        if !fileManager.fileExists(atPath: storageURL.path) {
+            // create an empty folder in the path
+            do {
+                try fileManager.createDirectory(at: storageURL, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("Error creating directory: \(error)")
+            }
+        }
+        
+        return storageURL
     }
     
     func startVM() throws {
@@ -101,6 +129,15 @@ class LinuxKit: ObservableObject {
 
         consoleConfiguration.ports[0] = consolePortConfig
         virtualMachineConfiguration.consoleDevices = [consoleConfiguration]
+        
+        // create the virtio file share to store the containers
+        // In Linux guests, use `mount -t virtiofs containers /var/lib/containerd`.
+        let storageUrl = self.getStorageUrl()
+        let sharedDirectory = VZSharedDirectory(url: storageUrl, readOnly: false)
+        let singleDirectoryShare = VZSingleDirectoryShare(directory: sharedDirectory)
+        let sharingConfiguration = VZVirtioFileSystemDeviceConfiguration(tag: "containers")
+        sharingConfiguration.share = singleDirectoryShare
+        virtualMachineConfiguration.directorySharingDevices = [sharingConfiguration]
         
         try virtualMachineConfiguration.validate()
         
